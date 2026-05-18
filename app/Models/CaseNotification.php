@@ -1,0 +1,26 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class CaseNotification extends Model
+{
+    protected $fillable = ['user_id', 'legal_case_id', 'title', 'message', 'type', 'read_at'];
+
+    protected function casts(): array
+    {
+        return ['read_at' => 'datetime'];
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function legalCase(): BelongsTo
+    {
+        return $this->belongsTo(LegalCase::class);
+    }
+}
