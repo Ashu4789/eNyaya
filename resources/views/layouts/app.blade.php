@@ -21,6 +21,8 @@
                 <a class="nav-link" href="{{ route('dashboard') }}"><i class="bi bi-speedometer2"></i> Dashboard</a>
                 <a class="nav-link" href="{{ route('cases.index') }}"><i class="bi bi-folder2-open"></i> Cases</a>
                 <a class="nav-link" href="{{ route('hearings.index') }}"><i class="bi bi-calendar-event"></i> Hearings</a>
+                <a class="nav-link" href="{{ route('cause-list.index') }}"><i class="bi bi-list-ol"></i> Cause List</a>
+                <a class="nav-link" href="{{ route('cases.index', ['priority' => 'urgent']) }}"><i class="bi bi-exclamation-octagon"></i> Urgent Matters</a>
                 @if(auth()->user()->hasRole(['super-admin','court-admin','judge']))
                     <a class="nav-link" href="{{ route('reports.index') }}"><i class="bi bi-file-earmark-bar-graph"></i> Reports</a>
                 @endif
@@ -35,7 +37,11 @@
                     <h1>@yield('page-title', 'Dashboard')</h1>
                 </div>
                 <div class="d-flex align-items-center gap-2">
-                    <button class="btn btn-outline-secondary btn-sm" id="darkModeToggle" type="button"><i class="bi bi-moon"></i></button>
+                    <form action="{{ route('cases.index') }}" class="global-search">
+                        <i class="bi bi-search"></i>
+                        <input name="q" placeholder="Search case ID, advocate, client, hearing date">
+                    </form>
+                    <button class="btn btn-outline-secondary btn-sm" id="darkModeToggle" type="button" title="Toggle theme"><i class="bi bi-moon"></i></button>
                     <span class="badge text-bg-success">{{ auth()->user()->role?->name }}</span>
                     <form method="POST" action="{{ route('logout') }}">@csrf <button class="btn btn-primary btn-sm">Logout</button></form>
                 </div>
