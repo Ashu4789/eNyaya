@@ -11,9 +11,12 @@ class Hearing extends Model
         'legal_case_id',
         'scheduled_at',
         'courtroom',
+        'hearing_sequence',
         'status',
         'purpose',
         'notes',
+        'adjournment_requested_by',
+        'adjournment_reason',
         'created_by',
     ];
 
