@@ -258,7 +258,7 @@ MongoDB-oriented collections/log streams:
 
 If MongoDB support is unavailable during local review, the logging service safely falls back to Laravel logs so the application remains usable.
 
-## Demo Accounts
+## Demo Accounts and Role Access
 
 After seeding, each demo account uses the password:
 
@@ -266,13 +266,43 @@ After seeding, each demo account uses the password:
 password
 ```
 
-Accounts:
+Primary accounts:
 
-- `admin@enyaya.local` - Super Admin
-- `court@enyaya.local` - Court Administrator
-- `judge@enyaya.local` - Judge
-- `advocate@enyaya.local` - Advocate/Lawyer
-- `client@enyaya.local` - Client/User
+| Role | Email | Access Provided |
+| --- | --- | --- |
+| Super Admin | `admin@enyaya.local` | Full platform access, all dashboards, all cases, hearings, cause lists, reports, notifications, and administrative oversight. |
+| Court Administrator | `court@enyaya.local` | Court operations access for filing support, case allocation, hearing scheduling, courtroom coordination, cause list generation, notifications, and reports. |
+| Judge | `judge@enyaya.local` | Judicial access focused on assigned cases, hearing history, cause lists, evidence records, adjournment pressure, and reports. |
+| Advocate/Lawyer | `advocate@enyaya.local` | Representative access to matters linked to the advocate, hearing schedules, evidence upload workflow, vakalatnama status, and client case updates. |
+| Client/User | `client@enyaya.local` | Party access to own cases, hearing dates, dashboard notifications, and document-related updates. |
+
+Additional seeded users:
+
+| Role | Emails |
+| --- | --- |
+| Court Administrators | `registry@enyaya.local` |
+| Judges | `judge.rao@enyaya.local`, `judge.menon@enyaya.local`, `judge.qureshi@enyaya.local` |
+| Advocates | `advocate.sethi@enyaya.local`, `advocate.iyer@enyaya.local`, `advocate.khan@enyaya.local`, `advocate.malhotra@enyaya.local` |
+| Clients | `sunita.devi@example.local`, `amit.verma@example.local`, `neha.bansal@example.local`, `farhan.ali@example.local`, `lakshmi.traders@example.local`, `kiran.joshi@example.local`, `sanjay.gupta@example.local`, `pooja.mehra@example.local`, `ramesh.chandra@example.local` |
+
+## Seeded Demo Data
+
+The database seeder creates a varied court dataset so every major screen has realistic content.
+
+Seeded data includes:
+
+- 22 users across all five roles
+- 15 legal cases across Civil, Bail, Criminal, Family, Consumer, Cyber Crime, and Urgent categories
+- Multiple persisted status stages including Filed, Under Review, Hearing Scheduled, In Progress, and Disposed, with the UI timeline also showing Accepted and Judgment Reserved stages for fresh installations that use the expanded schema
+- Urgent bail and eviction matters for priority dashboard and cause list highlighting
+- Cyber crime cases with digital evidence context such as screenshots, bank SMS, transaction trails, and wallet records
+- Family court matters with mediation and maintenance context
+- Consumer disputes for damaged goods, hospital billing, and failed software service
+- Civil matters involving electricity billing, demolition notice, bank restructuring, and housing society settlement
+- 20 hearings across multiple courtrooms with cause list sequence values
+- Completed, scheduled, rescheduled, and adjourned hearing records
+- Repeated adjournment examples to demonstrate delay tracking and red/yellow case signals
+- Notifications for admins, court staff, judges, advocates, and clients
 
 ## Local Setup
 
