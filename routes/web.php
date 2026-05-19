@@ -2,9 +2,11 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CaseController;
+use App\Http\Controllers\CauseListController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\HearingController;
+use App\Http\Controllers\LegalTemplateController;
 use App\Http\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
 
@@ -28,6 +30,9 @@ Route::middleware('auth')->group(function () {
     Route::resource('cases', CaseController::class);
     Route::post('/cases/{case}/documents', [DocumentController::class, 'store'])->name('cases.documents.store');
     Route::resource('hearings', HearingController::class)->only(['index', 'store', 'update']);
+    Route::get('/cause-list', [CauseListController::class, 'index'])->name('cause-list.index');
+    Route::get('/cause-list/export', [CauseListController::class, 'export'])->name('cause-list.export');
+    Route::get('/templates/{template}', [LegalTemplateController::class, 'download'])->name('templates.download');
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index')->middleware('role:super-admin,court-admin,judge');
     Route::get('/reports/export', [ReportController::class, 'export'])->name('reports.export')->middleware('role:super-admin,court-admin,judge');
 });
