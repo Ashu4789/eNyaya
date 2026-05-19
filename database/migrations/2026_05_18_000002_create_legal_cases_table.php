@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('respondent_contact')->nullable();
             $table->date('filing_date')->index();
             $table->dateTime('next_hearing_date')->nullable()->index();
-            $table->enum('status', ['filed', 'under_review', 'hearing_scheduled', 'in_progress', 'disposed', 'dismissed'])->default('filed')->index();
+            $table->enum('status', ['filed', 'accepted', 'under_review', 'hearing_scheduled', 'in_progress', 'judgment_reserved', 'disposed', 'dismissed'])->default('filed')->index();
             $table->enum('priority', ['low', 'normal', 'high', 'urgent'])->default('normal')->index();
             $table->foreignId('client_id')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('advocate_id')->nullable()->constrained('users')->nullOnDelete();
