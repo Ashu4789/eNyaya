@@ -13,7 +13,7 @@ class DocumentService
     {
     }
 
-    public function store(LegalCase $case, UploadedFile $file, string $label): array
+    public function store(LegalCase $case, UploadedFile $file, string $label, string $category = 'other', ?string $tags = null): array
     {
         $path = $file->store("case-documents/{$case->case_number}", 'local');
 
@@ -21,6 +21,8 @@ class DocumentService
             'case_id' => $case->id,
             'case_number' => $case->case_number,
             'label' => $label,
+            'category' => $category,
+            'tags' => collect(explode(',', (string) $tags))->map(fn ($tag) => trim($tag))->filter()->values()->all(),
             'original_name' => $file->getClientOriginalName(),
             'stored_path' => $path,
             'mime_type' => $file->getMimeType(),
