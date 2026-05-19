@@ -12,10 +12,19 @@ class DocumentController extends Controller
     {
         $data = $request->validate([
             'label' => ['required', 'string', 'max:120'],
-            'document' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:10240'],
+            'category' => ['required', 'in:evidence,vakalatnama,affidavit,petition,hearing_notice,other'],
+            'tags' => ['nullable', 'string', 'max:255'],
+            'document' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png,mp4,mp3,wav', 'max:51200'],
         ]);
 
-        $documents->store($case, $data['document'], $data['label']);
+        $metadata = $documents->store($case, $data['document'], $data['label'], $data['category'], $data['tags'] ?? null);
+
+        if ($data['category'] === 'vakalatnama') {
+            $case->update([
+                'vakalatnama_path' => $metadata['stored_path'],
+                'vakalatnama_status' => 'pending',
+            ]);
+        }
 
         return back()->with('status', 'Document uploaded and metadata recorded.');
     }
