@@ -16,15 +16,22 @@ class CaseController extends Controller
                 $inner->where('case_number', 'like', "%{$request->q}%")
                     ->orWhere('title', 'like', "%{$request->q}%")
                     ->orWhere('petitioner_name', 'like', "%{$request->q}%")
-                    ->orWhere('respondent_name', 'like', "%{$request->q}%");
+                    ->orWhere('respondent_name', 'like', "%{$request->q}%")
+                    ->orWhereHas('advocate', fn ($userQuery) => $userQuery->where('name', 'like', "%{$request->q}%"))
+                    ->orWhereHas('client', fn ($userQuery) => $userQuery->where('name', 'like', "%{$request->q}%"))
+                    ->orWhereHas('hearings', fn ($hearingQuery) => $hearingQuery->whereDate('scheduled_at', $request->q));
             }))
             ->when($request->filled('status'), fn ($query) => $query->where('status', $request->status))
             ->when($request->filled('priority'), fn ($query) => $query->where('priority', $request->priority))
+            ->when($request->filled('category'), fn ($query) => $query->where('category', $request->category))
             ->latest()
             ->paginate(10)
             ->withQueryString();
 
-        return view('cases.index', ['cases' => $cases]);
+        return view('cases.index', [
+            'cases' => $cases,
+            'categories' => $this->categories(),
+        ]);
     }
 
     public function create()
@@ -42,8 +49,9 @@ class CaseController extends Controller
     public function show(LegalCase $case)
     {
         $case->load(['client', 'advocate', 'judge', 'hearings' => fn ($q) => $q->latest('scheduled_at')]);
+        $adjournmentCount = $case->hearings->where('status', 'adjourned')->count();
 
-        return view('cases.show', ['case' => $case]);
+        return view('cases.show', ['case' => $case, 'adjournmentCount' => $adjournmentCount]);
     }
 
     public function edit(LegalCase $case)
@@ -72,6 +80,7 @@ class CaseController extends Controller
             'clients' => User::whereHas('role', fn ($q) => $q->where('slug', 'client'))->orderBy('name')->get(),
             'advocates' => User::whereHas('role', fn ($q) => $q->where('slug', 'advocate'))->orderBy('name')->get(),
             'judges' => User::whereHas('role', fn ($q) => $q->where('slug', 'judge'))->orderBy('name')->get(),
+            'categories' => $this->categories(),
         ];
     }
 
@@ -80,19 +89,24 @@ class CaseController extends Controller
         return $request->validate([
             'case_number' => ['nullable', 'string', 'max:50', 'unique:legal_cases,case_number,'.$request->route('case')?->id],
             'title' => ['required', 'string', 'max:255'],
-            'category' => ['required', 'string', 'max:100'],
+            'category' => ['required', 'in:Urgent,Bail,Civil,Criminal,Family,Consumer,Cyber Crime'],
             'petitioner_name' => ['required', 'string', 'max:255'],
             'petitioner_contact' => ['nullable', 'string', 'max:100'],
             'respondent_name' => ['required', 'string', 'max:255'],
             'respondent_contact' => ['nullable', 'string', 'max:100'],
             'filing_date' => ['required', 'date'],
             'next_hearing_date' => ['nullable', 'date'],
-            'status' => ['required', 'in:filed,under_review,hearing_scheduled,in_progress,disposed,dismissed'],
+            'status' => ['required', 'in:filed,accepted,under_review,hearing_scheduled,in_progress,judgment_reserved,disposed,dismissed'],
             'priority' => ['required', 'in:low,normal,high,urgent'],
             'client_id' => ['nullable', 'exists:users,id'],
             'advocate_id' => ['nullable', 'exists:users,id'],
             'judge_id' => ['nullable', 'exists:users,id'],
             'summary' => ['nullable', 'string'],
         ]);
+    }
+
+    private function categories(): array
+    {
+        return ['Urgent', 'Bail', 'Civil', 'Criminal', 'Family', 'Consumer', 'Cyber Crime'];
     }
 }
