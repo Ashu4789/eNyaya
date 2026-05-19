@@ -24,6 +24,9 @@ class LegalCase extends Model
         'advocate_id',
         'judge_id',
         'summary',
+        'vakalatnama_path',
+        'vakalatnama_status',
+        'vakalatnama_verified_at',
     ];
 
     protected function casts(): array
@@ -31,6 +34,7 @@ class LegalCase extends Model
         return [
             'filing_date' => 'date',
             'next_hearing_date' => 'datetime',
+            'vakalatnama_verified_at' => 'datetime',
         ];
     }
 
