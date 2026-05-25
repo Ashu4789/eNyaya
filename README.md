@@ -25,6 +25,7 @@ The project is inspired by practical concepts seen in Indian court operations an
 
 ### Database Systems
 - **SQLite / MySQL**: Used for primary transactional application data.
+- **Search Optimization Indexes**: Custom database indexes applied to the `petitioner_name` and `respondent_name` columns in the `legal_cases` table to optimize query execution times during text-based case searches.
 - **MongoDB**: Used for structured logs (activities, audit history, document metadata) via `mongodb/mongodb` client library.
 - **Laravel Log Fallback**: Safe fallback to Laravel log files if MongoDB is not present.
 
