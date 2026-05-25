@@ -4,443 +4,230 @@ eNyaya is a Laravel 12 based Electronic Justice and Case Management Portal desig
 
 The project is inspired by practical concepts seen in Indian court operations and public justice platforms, including daily cause lists, vakalatnama handling, hearing adjournments, courtroom allocation, advocate and judge assignment, document records, and pending/disposed case reporting.
 
+---
+
 ## Project Objectives
 
-- Digitize core court administration workflows for cases, hearings, documents, reports, and notifications.
-- Provide role-specific access for super admins, court administrators, judges, advocates, and clients.
-- Model Indian judicial concepts such as cause lists, adjournments, vakalatnama, case categories, courtroom scheduling, and case timelines.
-- Store structured case data in a relational database while recording document metadata and audit history through MongoDB-oriented logging.
-- Present a professional government-style dashboard that is clean, responsive, and suitable for academic demonstration.
-- Leave clear extension points for AI summarization, delay prediction, and similar-case recommendations.
-
-## Technology Stack
-
-- PHP 8.2+
-- Laravel 12
-- Composer
-- Blade templates
-- Bootstrap 5
-- Bootstrap Icons
-- Chart.js
-- MySQL or SQLite for relational application data
-- MongoDB-oriented metadata logging with Laravel log fallback
-- Vite-ready frontend structure
-
-## Core Modules
-
-### Authentication and Authorization
-
-The application includes registration, login, logout, password reset request flow, and an email-verification-ready user model. Access is controlled through a role model and middleware.
-
-Supported roles:
-
-- Super Admin
-- Court Administrator
-- Judge
-- Advocate/Lawyer
-- Client/User
-
-### Dashboard
-
-The dashboard gives a quick operational view of the court system.
-
-Displayed metrics include:
-
-- Total cases
-- Today's hearings
-- Pending hearings
-- Disposed cases
-- Urgent matters
-- Recent cases
-- Upcoming hearings
-- Judge workload
-- Case status distribution
-- User notifications
-
-The interface uses a restrained government dashboard style: dark navy navigation, white content surfaces, soft gray backgrounds, emerald success states, and maroon legal alerts.
-
-### Case Management
-
-Cases can be created, edited, searched, filtered, viewed, and deleted. Each case can be linked to a client, advocate, and judge.
-
-Tracked case fields include:
-
-- Case number
-- Title
-- Judicial category
-- Petitioner and respondent details
-- Filing date
-- Next hearing date
-- Case status
-- Case priority
-- Assigned client
-- Assigned advocate
-- Assigned judge
-- Summary
-- Vakalatnama status
-
-Supported case categories:
-
-- Urgent
-- Bail
-- Civil
-- Criminal
-- Family
-- Consumer
-- Cyber Crime
-
-Supported case timeline stages:
-
-- Filed
-- Accepted
-- Under Review
-- Hearing Scheduled
-- In Progress
-- Judgment Reserved
-- Disposed
-
-### Hearing Management
-
-Hearings can be scheduled and updated from the hearing calendar. The system captures courtroom, hearing sequence, purpose, notes, and status.
-
-Supported hearing statuses:
-
-- Scheduled
-- Rescheduled
-- Completed
-- Adjourned
-- Cancelled
-
-The hearing scheduler includes courtroom conflict prevention by checking whether another hearing already exists in the same courtroom within the same time window.
-
-### Adjournment Tracking
-
-Adjournments are recorded directly on hearings.
-
-Tracked adjournment details:
-
-- Number of adjourned hearings per case
-- Who requested the adjournment
-- Reason for adjournment
-
-The case details page highlights adjournment pressure so repeated delays are easy to notice during review.
-
-### Daily Cause List
-
-The Cause List module generates a daily hearing list similar to court cause lists used in Indian judicial workflows.
-
-Cause list features:
-
-- Filter by date
-- Filter by courtroom
-- Filter by judge
-- Auto-prioritize urgent, bail, criminal, and high-priority matters
-- Display hearing sequence
-- Display case number, parties, category, courtroom, judge, time, and priority
-- Print-friendly export flow for PDF generation through the browser print dialog
-- Court seal style watermark
-
-Cause list route:
-
-```text
-/cause-list
-```
-
-### Evidence and Document Management
-
-Documents are uploaded against a case and stored locally, while metadata is recorded through the document service.
-
-Supported document categories:
-
-- Evidence
-- Vakalatnama
-- Affidavit
-- Petition
-- Hearing Notice
-- Other
-
-Supported file types include PDFs, images, audio, and video files for realistic digital evidence handling.
-
-Metadata captured:
-
-- Case ID
-- Case number
-- Label
-- Category
-- Tags
-- Original filename
-- Stored path
-- MIME type
-- Size
-- Version timestamp
-- Uploading user
-
-When a document is uploaded as a vakalatnama, the linked case is updated to mark the vakalatnama as pending verification.
-
-### Legal Templates
-
-The system provides downloadable starter templates for common legal documents:
-
-- Affidavit
-- Petition
-- Vakalatnama
-- Hearing Notice
-
-Templates are exposed through:
-
-```text
-/templates/{template}
-```
-
-### Reports
-
-Reports are available for authorized users such as super admins, court administrators, and judges.
-
-Current reports include:
-
-- Pending cases
-- Completed cases
-- Monthly hearing report
-- User activity report
-- CSV export
-- AI future enhancement roadmap
-
-### Notifications
-
-The system includes case notification records and an API endpoint for notification listing. It is structured to support future automated reminders such as:
-
-- Seven days before hearing
-- One day before hearing
-- Hearing-day alert
-- Email delivery
-- SMS-ready architecture
-- Dashboard alerts
-
-### API Endpoints
-
-The project includes REST-style API endpoints for integration and mobile/frontend expansion.
-
-Available API areas:
-
-- Authentication
-- Cases
-- Hearings
-- Notifications
-
-Examples:
-
-```text
-POST /api/auth/login
-GET  /api/cases
-GET  /api/cases/{case}
-GET  /api/hearings
-GET  /api/notifications
-```
-
-## Database Design
-
-Primary relational tables:
-
-- `roles`
-- `users`
-- `legal_cases`
-- `hearings`
-- `case_notifications`
-- Laravel support tables for cache, jobs, sessions, and password reset tokens
-
-MongoDB-oriented collections/log streams:
-
-- `activity_logs`
-- `document_metadata`
-- `audit_history`
-- `system_logs`
-- `hearing_notes`
-
-If MongoDB support is unavailable during local review, the logging service safely falls back to Laravel logs so the application remains usable.
-
-## Demo Accounts and Role Access
-
-After seeding, each demo account uses the password:
-
-```text
-password
-```
-
-Primary accounts:
-
-| Role | Email | Access Provided |
-| --- | --- | --- |
-| Super Admin | `admin@enyaya.local` | Full platform access, all dashboards, all cases, hearings, cause lists, reports, notifications, and administrative oversight. |
-| Court Administrator | `court@enyaya.local` | Court operations access for filing support, case allocation, hearing scheduling, courtroom coordination, cause list generation, notifications, and reports. |
-| Judge | `judge@enyaya.local` | Judicial access focused on assigned cases, hearing history, cause lists, evidence records, adjournment pressure, and reports. |
-| Advocate/Lawyer | `advocate@enyaya.local` | Representative access to matters linked to the advocate, hearing schedules, evidence upload workflow, vakalatnama status, and client case updates. |
-| Client/User | `client@enyaya.local` | Party access to own cases, hearing dates, dashboard notifications, and document-related updates. |
-
-Additional seeded users:
-
-| Role | Emails |
-| --- | --- |
-| Court Administrators | `registry@enyaya.local` |
-| Judges | `judge.rao@enyaya.local`, `judge.menon@enyaya.local`, `judge.qureshi@enyaya.local` |
-| Advocates | `advocate.sethi@enyaya.local`, `advocate.iyer@enyaya.local`, `advocate.khan@enyaya.local`, `advocate.malhotra@enyaya.local` |
-| Clients | `sunita.devi@example.local`, `amit.verma@example.local`, `neha.bansal@example.local`, `farhan.ali@example.local`, `lakshmi.traders@example.local`, `kiran.joshi@example.local`, `sanjay.gupta@example.local`, `pooja.mehra@example.local`, `ramesh.chandra@example.local` |
-
-## Seeded Demo Data
-
-The database seeder creates a varied court dataset so every major screen has realistic content.
-
-Seeded data includes:
-
-- 22 users across all five roles
-- 15 legal cases across Civil, Bail, Criminal, Family, Consumer, Cyber Crime, and Urgent categories
-- Multiple persisted status stages including Filed, Under Review, Hearing Scheduled, In Progress, and Disposed, with the UI timeline also showing Accepted and Judgment Reserved stages for fresh installations that use the expanded schema
-- Urgent bail and eviction matters for priority dashboard and cause list highlighting
-- Cyber crime cases with digital evidence context such as screenshots, bank SMS, transaction trails, and wallet records
-- Family court matters with mediation and maintenance context
-- Consumer disputes for damaged goods, hospital billing, and failed software service
-- Civil matters involving electricity billing, demolition notice, bank restructuring, and housing society settlement
-- 20 hearings across multiple courtrooms with cause list sequence values
-- Completed, scheduled, rescheduled, and adjourned hearing records
-- Repeated adjournment examples to demonstrate delay tracking and red/yellow case signals
-- Notifications for admins, court staff, judges, advocates, and clients
-
-## Local Setup
-
-### Option 1: SQLite
-
-SQLite is convenient for quick local review.
-
-1. Install PHP dependencies:
-
-```bash
-composer install
-```
-
-2. Copy the environment file if needed:
-
+- **Workflow Digitization**: Core court administration workflows for cases, hearings, documents, reports, and notifications.
+- **Role-Based Portals**: Role-specific access control for Super Admins, Court Administrators, Judges, Advocates, and Clients.
+- **Indian Judicial Context**: Models concepts such as cause lists, adjournments, vakalatnama, case categories, courtroom scheduling, and case timelines.
+- **Relational & Log Persistence**: Store structured case data in SQLite/MySQL while recording document metadata and audit history through MongoDB-oriented logging (with a safe local log fallback).
+- **Public-Portal Aesthetics**: A clean government dashboard style (dark navy navigation, glassmorphic panels, Outfit typography, transition hover effects, and modern state tags).
+- **Specialized Summon Notices**: Integration of asynchronous, role-specific email summons for clients, agenda notifications for advocates, and calendar docket alerts for judges.
+
+---
+
+## Technology Stack & Libraries Used
+
+### Backend Framework
+- **PHP 8.2+**
+- **Laravel 12 (latest)**: Service layer architecture, Eloquent ORM, database migrations, and queue-based Mailables.
+
+### Database Systems
+- **SQLite / MySQL**: Used for primary transactional application data.
+- **MongoDB**: Used for structured logs (activities, audit history, document metadata) via `mongodb/mongodb` client library.
+- **Laravel Log Fallback**: Safe fallback to Laravel log files if MongoDB is not present.
+
+### Frontend Integration
+- **Vite & @tailwindcss/vite**: High-performance asset bundler compiling modern CSS/JS inputs.
+- **Bootstrap 5 & Bootstrap Icons**: Responsive design system and navigation graphics.
+- **Google Fonts (Outfit)**: Premium modern typography imported to enhance visual quality.
+- **Chart.js**: Client-side status and category workload visualizers.
+
+---
+
+## Core Modules & Implemented Features
+
+### 1. Authentication and Authorization
+Access is controlled through a database role model and route middleware.
+- **Roles**: Super Admin, Court Administrator, Judge, Advocate/Lawyer, Client/User.
+- **Features**: Registration, login, logout, password resets, and role-based route middleware protection.
+
+### 2. Dashboard
+Gives a quick operational overview tailored to the logged-in user:
+- **Metrics**: Total cases, today's hearings count, pending docket size, and disposed count.
+- **Visuals**: Dynamic Chart.js status distribution doughnut, recent case lists, upcoming hearings, urgent matters, and judge workloads.
+
+### 3. Case Management
+Allows full lifecycle tracking of cases:
+- **Fields**: Title, case number, filing date, petitioner/respondent names, lawyer/judge assignments, and vakalatnama status.
+- **Centralized Enums**: Standardized categories (`Urgent`, `Bail`, `Civil`, `Criminal`, `Family`, `Consumer`, `Cyber Crime`), priority levels (`low`, `normal`, `high`, `urgent`), and case statuses.
+- **Timeline**: Visual step tracking (Filed, Accepted, Under Review, Hearing Scheduled, In Progress, Judgment Reserved, Disposed).
+
+### 4. Hearing & Adjournment Management
+- **Courtroom Scheduler**: Direct scheduling with courtroom conflict checks to prevent time slot double-booking (30-minute buffers).
+- **Adjournment Tracker**: Highlights case delay pressure by tracking adjournment count, requesting party, and reasons.
+- **Specialized Mail Delivery**: Fires asynchronous emails to the Judge, Advocate, and Client when a hearing is scheduled or rescheduled.
+
+### 5. Daily Cause List
+- **Indian Court style list**: Filters by date, courtroom, and judge.
+- **Prioritization**: Automatically ranks and orders urgent, bail, and criminal matters at the top.
+- **Print support**: Print-friendly CSS formats the cause list with a court watermark seal for PDF saving.
+
+### 6. Evidence & Case Document Center
+- **Dynamic Uploads**: Supports PDF, images, video, and audio file formats.
+- **Document List View**: Displays uploaded files directly in the case details page, showing metadata (size, tags, category).
+- **Secure Downloads**: Links files to a download controller with path-validation rules to block directory traversal attacks (`403 Forbidden`).
+- **Storage Fallback**: Checks MongoDB for file metadata. If MongoDB is disabled, it scans the local case directory to mock document lists so the feature remains fully functional.
+
+### 7. Reports & Legal Templates
+- **Reports**: Access to pending/completed case metrics, monthly hearing volumes, and advocate/judge case activity logs. Includes CSV exports.
+- **Starter Templates**: Downloadable boilerplate HTML files for `Affidavit`, `Petition`, `Vakalatnama`, and `Hearing Notice`.
+
+---
+
+## Environment Variables (.env) Configuration
+
+To run the application, copy the example environment file:
 ```bash
 cp .env.example .env
 ```
 
-3. Configure `.env`:
+Open `.env` and configure the following parameters:
 
+### 1. Database Connections
+- **Option A: SQLite (Default & Recommended for local review)**
+  ```env
+  DB_CONNECTION=sqlite
+  ```
+  *(The sqlite database file is automatically touched at `database/database.sqlite` during setup).*
+
+- **Option B: MySQL (XAMPP / local server)**
+  ```env
+  DB_CONNECTION=mysql
+  DB_HOST=127.0.0.1
+  DB_PORT=3306
+  DB_DATABASE=enyaya
+  DB_USERNAME=root
+  DB_PASSWORD=
+  ```
+
+### 2. Email Service Credentials
+- **Option A: Laravel Log Fallback (Default for local review)**
+  ```env
+  MAIL_MAILER=log
+  ```
+  *(All emails will be written to `storage/logs/laravel.log` so you can inspect them without a mail server).*
+
+- **Option B: Real SMTP Server (e.g. Mailtrap, Gmail, SendGrid)**
+  ```env
+  MAIL_MAILER=smtp
+  MAIL_HOST=sandbox.smtp.mailtrap.io   # replace with your SMTP host
+  MAIL_PORT=2525
+  MAIL_USERNAME=your_smtp_username
+  MAIL_PASSWORD=your_smtp_password
+  MAIL_ENCRYPTION=tls
+  MAIL_FROM_ADDRESS="noreply@enyaya.gov.in"
+  MAIL_FROM_NAME="eNyaya Legal Portal"
+  ```
+
+### 3. MongoDB Logging (Optional)
+If you have MongoDB running locally, configure:
 ```env
-DB_CONNECTION=sqlite
-```
-
-4. Generate the app key and initialize the database:
-
-```bash
-php artisan key:generate
-php artisan migrate:fresh --seed
-php artisan storage:link
-```
-
-5. Start the app:
-
-```bash
-php artisan serve
-```
-
-6. Open:
-
-```text
-http://127.0.0.1:8000
-```
-
-### Option 2: XAMPP and MySQL
-
-1. Start Apache and MySQL in XAMPP.
-2. Create a MySQL database named `enyaya`.
-3. Configure `.env`:
-
-```env
-DB_CONNECTION=mysql
-DB_DATABASE=enyaya
-DB_USERNAME=root
-DB_PASSWORD=
 MONGODB_URI=mongodb://127.0.0.1:27017
 MONGODB_DATABASE=enyaya_documents
 ```
+*(If left empty or uninstalled, logging falls back to standard logs and document listing falls back to disk scanning).*
 
-4. Install and initialize:
+---
 
+## Local Setup & Execution Guide
+
+Follow these steps to run the project from a fresh clone:
+
+### Step 1: Install Dependencies
+Install PHP libraries via Composer:
 ```bash
 composer install
-php artisan key:generate
-php artisan migrate:fresh --seed
-php artisan storage:link
-php artisan serve
+```
+Install frontend node packages:
+```bash
+npm install
 ```
 
-5. Open:
+### Step 2: Set Up Environment & Keys
+Copy the env template:
+```bash
+cp .env.example .env
+```
+Generate the cryptographic application key:
+```bash
+php artisan key:generate
+```
 
+### Step 3: Initialize Database & Seed Demo Data
+Run the migrations and populate the database with Indian court demo records:
+```bash
+php artisan migrate:fresh --seed
+```
+
+### Step 4: Link Storage Folder
+Create the public symlink for uploads (required for document uploads/downloads):
+```bash
+php artisan storage:link
+```
+
+### Step 5: Compile Frontend Assets
+Build Vite CSS and JavaScript packages:
+```bash
+npm run build
+```
+
+### Step 6: Start Application Services
+You can run the application services in one of two ways:
+
+- **Option A: Run Concurrently (Recommended)**
+  Run the developer build script which starts the web server, background queue worker (for sending emails), log monitor, and Vite asset compiler all in a single terminal:
+  ```bash
+  npm run dev
+  ```
+
+- **Option B: Run Individually**
+  1. Start the HTTP server:
+     ```bash
+     php artisan serve
+     ```
+  2. In a separate terminal, start the queue worker to process the emails:
+     ```bash
+     php artisan queue:listen
+     ```
+
+Open your browser and navigate to:
 ```text
 http://127.0.0.1:8000
 ```
 
-## Useful Commands
+---
 
-Run tests:
+## Seeded Demo Accounts
 
+Each demo account uses the password:
+```text
+password
+```
+
+| Role | Email | Access Provided |
+| --- | --- | --- |
+| **Super Admin** | `admin@enyaya.local` | Full platform access, all case files, audit trail, user listings, and reports. |
+| **Court Administrator** | `court@enyaya.local` | Handles filing, courtroom scheduling, cause lists, and registrar operations. |
+| **Judge** | `judge@enyaya.local` | Judicial portal displaying assigned docket list, hearing history, and delay alerts. |
+| **Advocate/Lawyer** | `advocate@enyaya.local` | Access to client cases, evidence upload center, vakalatnama requests, and schedules. |
+| **Client/User** | `client@enyaya.local` | Access to own legal files, hearing dates, summonses, and notifications. |
+
+Additional registered accounts can be found in [DatabaseSeeder.php](file:///c:/Users/ashut/OneDrive/Desktop/eNyaya/database/seeders/DatabaseSeeder.php).
+
+---
+
+## Verification & Troubleshooting
+
+### Running Tests
+Execute PHPUnit tests to check code compliance:
 ```bash
 php artisan test
 ```
 
-List routes:
-
-```bash
-php artisan route:list
-```
-
-Reset and seed the database:
-
+### Resetting the Database
+To clear records and reseed from scratch, run:
 ```bash
 php artisan migrate:fresh --seed
 ```
-
-Start the local server:
-
-```bash
-php artisan serve
-```
-
-## Verification
-
-The current implementation has been verified with:
-
-```bash
-php artisan migrate
-php artisan test
-```
-
-Expected test result:
-
-```text
-3 tests passed
-```
-
-## Future Enhancements
-
-The project is structured so the following AI and automation capabilities can be added later:
-
-- Hearing delay prediction using adjournment count, judge workload, category, and case age.
-- AI legal summarization for pleadings, evidence, hearing notes, and orders.
-- Similar-case recommendation system for research and decision support.
-- Automated reminder scheduler for hearing notifications.
-- Full SMS gateway integration.
-- Evidence preview and secure document download workflows.
-- Dedicated advocate profile and vakalatnama verification dashboard.
-- Courtroom availability calendar with drag-and-drop scheduling.
-
-## Production Notes
-
-Before production deployment:
-
-- Configure HTTPS.
-- Configure a real mail transport.
-- Run a queue worker for notifications and background jobs.
-- Install and configure MongoDB PHP support if MongoDB persistence is required.
-- Review file upload storage and access controls.
-- Add backup policies for relational data and uploaded evidence.
-- Harden authentication, authorization, audit retention, and document access.
