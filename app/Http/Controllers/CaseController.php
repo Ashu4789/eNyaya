@@ -6,6 +6,7 @@ use App\Models\LegalCase;
 use App\Models\User;
 use App\Services\CaseService;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class CaseController extends Controller
 {
@@ -30,7 +31,9 @@ class CaseController extends Controller
 
         return view('cases.index', [
             'cases' => $cases,
-            'categories' => $this->categories(),
+            'categories' => LegalCase::CATEGORIES,
+            'statuses' => LegalCase::STATUSES,
+            'priorities' => LegalCase::PRIORITIES,
         ]);
     }
 
@@ -46,12 +49,17 @@ class CaseController extends Controller
         return redirect()->route('cases.show', $case)->with('status', 'Case registered successfully.');
     }
 
-    public function show(LegalCase $case)
+    public function show(LegalCase $case, \App\Services\DocumentService $documentService)
     {
         $case->load(['client', 'advocate', 'judge', 'hearings' => fn ($q) => $q->latest('scheduled_at')]);
         $adjournmentCount = $case->hearings->where('status', 'adjourned')->count();
+        $documents = $documentService->getDocuments($case);
 
-        return view('cases.show', ['case' => $case, 'adjournmentCount' => $adjournmentCount]);
+        return view('cases.show', [
+            'case' => $case,
+            'adjournmentCount' => $adjournmentCount,
+            'documents' => $documents,
+        ]);
     }
 
     public function edit(LegalCase $case)
@@ -80,7 +88,9 @@ class CaseController extends Controller
             'clients' => User::whereHas('role', fn ($q) => $q->where('slug', 'client'))->orderBy('name')->get(),
             'advocates' => User::whereHas('role', fn ($q) => $q->where('slug', 'advocate'))->orderBy('name')->get(),
             'judges' => User::whereHas('role', fn ($q) => $q->where('slug', 'judge'))->orderBy('name')->get(),
-            'categories' => $this->categories(),
+            'categories' => LegalCase::CATEGORIES,
+            'statuses' => LegalCase::STATUSES,
+            'priorities' => LegalCase::PRIORITIES,
         ];
     }
 
@@ -89,24 +99,19 @@ class CaseController extends Controller
         return $request->validate([
             'case_number' => ['nullable', 'string', 'max:50', 'unique:legal_cases,case_number,'.$request->route('case')?->id],
             'title' => ['required', 'string', 'max:255'],
-            'category' => ['required', 'in:Urgent,Bail,Civil,Criminal,Family,Consumer,Cyber Crime'],
+            'category' => ['required', Rule::in(LegalCase::CATEGORIES)],
             'petitioner_name' => ['required', 'string', 'max:255'],
             'petitioner_contact' => ['nullable', 'string', 'max:100'],
             'respondent_name' => ['required', 'string', 'max:255'],
             'respondent_contact' => ['nullable', 'string', 'max:100'],
             'filing_date' => ['required', 'date'],
             'next_hearing_date' => ['nullable', 'date'],
-            'status' => ['required', 'in:filed,accepted,under_review,hearing_scheduled,in_progress,judgment_reserved,disposed,dismissed'],
-            'priority' => ['required', 'in:low,normal,high,urgent'],
+            'status' => ['required', Rule::in(LegalCase::STATUSES)],
+            'priority' => ['required', Rule::in(LegalCase::PRIORITIES)],
             'client_id' => ['nullable', 'exists:users,id'],
             'advocate_id' => ['nullable', 'exists:users,id'],
             'judge_id' => ['nullable', 'exists:users,id'],
             'summary' => ['nullable', 'string'],
         ]);
-    }
-
-    private function categories(): array
-    {
-        return ['Urgent', 'Bail', 'Civil', 'Criminal', 'Family', 'Consumer', 'Cyber Crime'];
     }
 }

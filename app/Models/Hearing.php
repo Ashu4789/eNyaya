@@ -7,6 +7,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Hearing extends Model
 {
+    public const STATUSES = [
+        'scheduled',
+        'rescheduled',
+        'completed',
+        'adjourned',
+        'cancelled',
+    ];
+
     protected $fillable = [
         'legal_case_id',
         'scheduled_at',

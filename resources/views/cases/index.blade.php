@@ -3,7 +3,28 @@
 @section('content')
 <div class="panel">
     <div class="panel-header">
-        <form class="d-flex gap-2 flex-wrap"><input class="form-control search" name="q" value="{{ request('q') }}" placeholder="Search case number, party, title"><select class="form-select filter" name="status"><option value="">All status</option>@foreach(['filed','accepted','under_review','hearing_scheduled','in_progress','judgment_reserved','disposed','dismissed'] as $s)<option @selected(request('status')===$s) value="{{ $s }}">{{ str_replace('_',' ',ucfirst($s)) }}</option>@endforeach</select><select class="form-select filter" name="category"><option value="">All categories</option>@foreach($categories as $category)<option @selected(request('category')===$category) value="{{ $category }}">{{ $category }}</option>@endforeach</select><select class="form-select filter" name="priority"><option value="">All priority</option>@foreach(['low','normal','high','urgent'] as $priority)<option @selected(request('priority')===$priority) value="{{ $priority }}">{{ ucfirst($priority) }}</option>@endforeach</select><button class="btn btn-primary"><i class="bi bi-search"></i></button></form>
+        <form class="d-flex gap-2 flex-wrap">
+            <input class="form-control search" name="q" value="{{ request('q') }}" placeholder="Search case number, party, title">
+            <select class="form-select filter" name="status">
+                <option value="">All status</option>
+                @foreach($statuses as $s)
+                    <option @selected(request('status')===$s) value="{{ $s }}">{{ str_replace('_',' ',ucfirst($s)) }}</option>
+                @endforeach
+            </select>
+            <select class="form-select filter" name="category">
+                <option value="">All categories</option>
+                @foreach($categories as $category)
+                    <option @selected(request('category')===$category) value="{{ $category }}">{{ $category }}</option>
+                @endforeach
+            </select>
+            <select class="form-select filter" name="priority">
+                <option value="">All priority</option>
+                @foreach($priorities as $priority)
+                    <option @selected(request('priority')===$priority) value="{{ $priority }}">{{ ucfirst($priority) }}</option>
+                @endforeach
+            </select>
+            <button class="btn btn-primary"><i class="bi bi-search"></i></button>
+        </form>
         <a href="{{ route('cases.create') }}" class="btn btn-success"><i class="bi bi-plus-lg"></i> New Case</a>
     </div>
     <div class="table-responsive"><table class="table align-middle sticky-table"><thead><tr><th>Case ID</th><th>Title</th><th>Petitioner</th><th>Judge</th><th>Next Hearing</th><th>Status</th><th>Priority</th><th></th></tr></thead><tbody>

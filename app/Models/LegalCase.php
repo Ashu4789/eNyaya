@@ -8,6 +8,34 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class LegalCase extends Model
 {
+    public const STATUSES = [
+        'filed',
+        'accepted',
+        'under_review',
+        'hearing_scheduled',
+        'in_progress',
+        'judgment_reserved',
+        'disposed',
+        'dismissed',
+    ];
+
+    public const PRIORITIES = [
+        'low',
+        'normal',
+        'high',
+        'urgent',
+    ];
+
+    public const CATEGORIES = [
+        'Urgent',
+        'Bail',
+        'Civil',
+        'Criminal',
+        'Family',
+        'Consumer',
+        'Cyber Crime',
+    ];
+
     protected $fillable = [
         'case_number',
         'title',
