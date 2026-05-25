@@ -8,6 +8,11 @@ use App\Services\MongoLogService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Carbon;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ClientHearingSummons;
+use App\Mail\AdvocateHearingNotification;
+use App\Mail\JudgeHearingNotification;
 
 class HearingController extends Controller
 {
@@ -16,6 +21,7 @@ class HearingController extends Controller
         return view('hearings.index', [
             'hearings' => Hearing::with('legalCase')->orderBy('scheduled_at')->paginate(12),
             'cases' => LegalCase::orderBy('case_number')->get(),
+            'statuses' => Hearing::STATUSES,
         ]);
     }
 
@@ -47,6 +53,8 @@ class HearingController extends Controller
         $hearing->legalCase()->update(['next_hearing_date' => $hearing->scheduled_at, 'status' => 'hearing_scheduled']);
         $logger->record('hearing_notes', ['hearing_id' => $hearing->id, 'notes' => $data['notes'] ?? null, 'actor_id' => Auth::id()]);
 
+        $this->sendHearingEmails($hearing);
+
         return back()->with('status', 'Hearing scheduled.');
     }
 
@@ -56,7 +64,7 @@ class HearingController extends Controller
             'scheduled_at' => ['required', 'date'],
             'courtroom' => ['required', 'string', 'max:100'],
             'hearing_sequence' => ['nullable', 'integer', 'min:1'],
-            'status' => ['required', 'in:scheduled,rescheduled,completed,adjourned,cancelled'],
+            'status' => ['required', Rule::in(Hearing::STATUSES)],
             'purpose' => ['nullable', 'string', 'max:255'],
             'notes' => ['nullable', 'string'],
             'adjournment_requested_by' => ['nullable', 'string', 'max:120'],
@@ -70,6 +78,31 @@ class HearingController extends Controller
         $hearing->update($data);
         $logger->record('audit_history', ['action' => 'hearing_updated', 'hearing_id' => $hearing->id, 'payload' => $data, 'actor_id' => Auth::id()]);
 
+        $this->sendHearingEmails($hearing);
+
         return back()->with('status', 'Hearing updated.');
+    }
+
+    private function sendHearingEmails(Hearing $hearing): void
+    {
+        $case = $hearing->legalCase;
+        if (!$case) {
+            return;
+        }
+
+        // Email to Client
+        if ($case->client && $case->client->email) {
+            Mail::to($case->client->email)->queue(new ClientHearingSummons($hearing));
+        }
+
+        // Email to Advocate
+        if ($case->advocate && $case->advocate->email) {
+            Mail::to($case->advocate->email)->queue(new AdvocateHearingNotification($hearing));
+        }
+
+        // Email to Judge
+        if ($case->judge && $case->judge->email) {
+            Mail::to($case->judge->email)->queue(new JudgeHearingNotification($hearing));
+        }
     }
 }
