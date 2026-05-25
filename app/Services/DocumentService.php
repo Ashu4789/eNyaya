@@ -42,4 +42,40 @@ class DocumentService
 
         return Storage::disk('local')->download($path);
     }
+
+    public function getDocuments(LegalCase $case): array
+    {
+        $docs = $this->mongoLogService->retrieve('document_metadata', ['case_id' => $case->id]);
+
+        if (!empty($docs)) {
+            return array_map(function ($doc) {
+                return (array) $doc;
+            }, $docs);
+        }
+
+        $directory = "case-documents/{$case->case_number}";
+        if (!Storage::disk('local')->exists($directory)) {
+            return [];
+        }
+
+        $files = Storage::disk('local')->files($directory);
+        $docs = [];
+        foreach ($files as $file) {
+            $docs[] = [
+                'case_id' => $case->id,
+                'case_number' => $case->case_number,
+                'label' => basename($file),
+                'category' => 'other',
+                'tags' => [],
+                'original_name' => basename($file),
+                'stored_path' => $file,
+                'mime_type' => Storage::disk('local')->mimeType($file) ?: 'application/octet-stream',
+                'size' => Storage::disk('local')->size($file) ?: 0,
+                'uploaded_by' => null,
+                'recorded_at' => null,
+            ];
+        }
+
+        return $docs;
+    }
 }

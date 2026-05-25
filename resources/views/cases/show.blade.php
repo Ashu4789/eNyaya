@@ -28,6 +28,28 @@
             </form>
         </div>
         <div class="panel mt-3">
+            <h2>Case Documents File List</h2>
+            <div class="list-group list-group-flush">
+                @forelse($documents as $doc)
+                    <div class="list-group-item d-flex justify-content-between align-items-center py-2 px-0 bg-transparent border-bottom">
+                        <div>
+                            <strong>{{ $doc['label'] }}</strong>
+                            <span class="badge bg-secondary ms-1">{{ $doc['category'] }}</span>
+                            <div class="text-muted small">
+                                {{ $doc['original_name'] }} ({{ number_format($doc['size'] / 1024, 1) }} KB)
+                                @if(!empty($doc['tags']))
+                                    · Tags: {{ is_array($doc['tags']) ? implode(', ', $doc['tags']) : $doc['tags'] }}
+                                @endif
+                            </div>
+                        </div>
+                        <a href="{{ route('cases.documents.download', [$case, 'path' => $doc['stored_path']]) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-download"></i></a>
+                    </div>
+                @empty
+                    <p class="text-muted small">No documents uploaded for this case yet.</p>
+                @endforelse
+            </div>
+        </div>
+        <div class="panel mt-3">
             <h2>Legal Templates</h2>
             <div class="list-group list-group-flush">
                 <a class="list-group-item list-group-item-action" href="{{ route('templates.download','affidavit') }}"><i class="bi bi-download"></i> Affidavit</a>

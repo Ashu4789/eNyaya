@@ -28,4 +28,15 @@ class DocumentController extends Controller
 
         return back()->with('status', 'Document uploaded and metadata recorded.');
     }
+
+    public function download(Request $request, LegalCase $case, DocumentService $documents)
+    {
+        $path = $request->query('path');
+
+        // Directory traversal protection: force download path to remain within case directory
+        $prefix = "case-documents/{$case->case_number}/";
+        abort_unless(str_starts_with($path, $prefix), 403, 'Unauthorized file access.');
+
+        return $documents->download($path);
+    }
 }

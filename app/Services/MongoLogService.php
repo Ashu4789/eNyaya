@@ -32,4 +32,26 @@ class MongoLogService
 
         Log::channel(config('logging.default'))->info('mongo_fallback', $payload);
     }
+
+    public function retrieve(string $collection, array $filter): array
+    {
+        if (class_exists(\MongoDB\Client::class)) {
+            try {
+                $client = new \MongoDB\Client(config('mongodb.uri'));
+                $cursor = $client
+                    ->selectDatabase(config('mongodb.database'))
+                    ->selectCollection(config("mongodb.collections.$collection", $collection))
+                    ->find($filter);
+
+                return iterator_to_array($cursor);
+            } catch (\Throwable $exception) {
+                Log::warning('MongoDB read failed.', [
+                    'collection' => $collection,
+                    'error' => $exception->getMessage(),
+                ]);
+            }
+        }
+
+        return [];
+    }
 }

@@ -29,6 +29,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
     Route::resource('cases', CaseController::class);
     Route::post('/cases/{case}/documents', [DocumentController::class, 'store'])->name('cases.documents.store');
+    Route::get('/cases/{case}/documents/download', [DocumentController::class, 'download'])->name('cases.documents.download');
     Route::resource('hearings', HearingController::class)->only(['index', 'store', 'update']);
     Route::get('/cause-list', [CauseListController::class, 'index'])->name('cause-list.index');
     Route::get('/cause-list/export', [CauseListController::class, 'export'])->name('cause-list.export');
